@@ -1,0 +1,68 @@
+{
+  "app": {
+    "name": "StreamBox",
+    "version": "1.0.0",
+    "environment": "development"
+  },
+  "users": [
+    {
+      "id": 1,
+      "username": "alexm",
+      "name": "Alex Morgan",
+      "email": "alex.morgan@example.com",
+      "subscription": "Premium",
+      "watchHistory": [
+        "Interstellar",
+        "The Dark Knight",
+        "Inception"
+      ],
+      "favorites": [
+        "Breaking Bad",
+        "The Office"
+      ]
+    },
+    {
+      "id": 2,
+      "username": "sarahj",
+      "name": "Sarah Johnson",
+      "email": "sarah.johnson@example.com",
+      "subscription": "Basic",
+      "watchHistory": [
+        "The Queen's Gambit",
+        "Stranger Things"
+      ],
+      "favorites": [
+        "Arcane"
+      ]
+    }
+  ],
+  "movies": [
+    {
+      "id": 101,
+      "title": "Inception",
+      "genre": "Sci-Fi",
+      "rating": 8.8,
+      "releaseYear": 2010
+    },
+    {
+      "id": 102,
+      "title": "Whiplash",
+      "genre": "Drama",
+      "rating": 8.5,
+      "releaseYear": 2014
+    },
+    {
+      "id": 103,
+      "title": "Spider-Man: Into the Spider-Verse",
+      "genre": "Animation",
+      "rating": 8.4,
+      "releaseYear": 2018
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "autoplay": true,
+    "notifications": true,
+    "language": "en-US"
+  }
+}
