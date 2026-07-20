@@ -1,0 +1,35 @@
+{
+  "user": {
+    "name": "John Doe",
+    "age": 21,
+    "email": "john@example.com",
+    "isStudent": true,
+    "skills": [
+      "Python",
+      "JavaScript",
+      "Filmmaking"
+    ],
+    "address": {
+      "city": "Detroit",
+      "state": "Michigan",
+      "country": "USA"
+    }
+  },
+  "settings": {
+    "theme": "dark",
+    "notifications": true,
+    "language": "en-US"
+  },
+  "projects": [
+    {
+      "id": 1,
+      "name": "Short Film",
+      "status": "In Progress"
+    },
+    {
+      "id": 2,
+      "name": "Portfolio Website",
+      "status": "Completed"
+    }
+  ]
+}
