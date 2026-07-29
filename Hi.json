@@ -1,0 +1,35 @@
+{
+  "id": 1024,
+  "username": "coder_sajit",
+  "email": "sajit@example.com",
+  "isActive": true,
+  "profile": {
+    "firstName": "Sajit",
+    "lastName": "Konda",
+    "age": 25,
+    "role": "Software Developer"
+  },
+  "skills": [
+    "Git",
+    "JavaScript",
+    "JSON",
+    "Python"
+  ],
+  "preferences": {
+    "theme": "dark",
+    "notificationsEnabled": true,
+    "itemsPerPage": 20
+  },
+  "recentProjects": [
+    {
+      "projectId": "PRJ-01",
+      "name": "Git Practice Repository",
+      "status": "completed"
+    },
+    {
+      "projectId": "PRJ-02",
+      "name": "Movie Streaming API",
+      "status": "in-progress"
+    }
+  ]
+}
