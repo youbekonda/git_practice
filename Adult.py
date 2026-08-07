@@ -1,5 +1,5 @@
-name = "Maneesh"
-age = 16 
+name = input("What is your name? ")
+age = int(input("What is your age? "))
 adult = age >= 18
 
 print(name)
