@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IB Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182238;
+    --ink-soft:#4B5468;
+    --paper:#F3EFE4;
+    --paper-raised:#EAE2CD;
+    --paper-hover:#E7DFC9;
+    --surface:#FCFAF3;
+    --rule:#D2C9AF;
+    --ember:#B24623;
+    --ember-soft:#F1DAC6;
+    --moss:#3E6350;
+    --moss-soft:#DCE6DA;
+    --gold:#93701F;
+    --gold-soft:#EFE4C4;
+    --plum:#6A4A63;
+    --teal:#2C6363;
+    --shadow: 0 1px 2px rgba(24,34,56,.06);
+    --radius: 6px;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ink:#EDE7D6;
+      --ink-soft:#AFAA9B;
+      --paper:#14181F;
+      --paper-raised:#1D222C;
+      --paper-hover:#242A35;
+      --surface:#191E27;
+      --rule:#333A46;
+      --ember:#E07348;
+      --ember-soft:#3A2620;
+      --moss:#7FAE93;
+      --moss-soft:#20342A;
+      --gold:#D6B25C;
+      --gold-soft:#332C18;
+      --plum:#C79BC0;
+      --teal:#7FC1C1;
+      --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDE7D6;
+    --ink-soft:#AFAA9B;
+    --paper:#14181F;
+    --paper-raised:#1D222C;
+    --paper-hover:#242A35;
+    --surface:#191E27;
+    --rule:#333A46;
+    --ember:#E07348;
+    --ember-soft:#3A2620;
+    --moss:#7FAE93;
+    --moss-soft:#20342A;
+    --gold:#D6B25C;
+    --gold-soft:#332C18;
+    --plum:#C79BC0;
+    --teal:#7FC1C1;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top: env(safe-area-inset-top,0px);}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:14.5px;
+    line-height:1.5;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display); font-weight:500; margin:0; color:var(--ink);}
+  .mono{font-family:var(--font-mono);}
+  button{font-family:inherit; cursor:pointer;}
+  input,select,textarea{font-family:inherit; font-size:inherit; color:inherit;}
+  a{color:inherit;}
+  ::selection{background:var(--gold-soft);}
+  :focus-visible{outline:2px solid var(--ember); outline-offset:2px;}
+ 
+  /* ---------- layout shell ---------- */
+  #app{display:none; min-height:100%;}
+  #app.ready{display:flex;}
+  .rail{
+    width:220px; flex-shrink:0;
+    border-right:1px solid var(--rule);
+    padding:20px 14px;
+    display:flex; flex-direction:column; gap:26px;
+    position:sticky; top:0; align-self:flex-start;
+    height:100vh; height:100dvh;
+  }
+  .brand{display:flex; align-items:baseline; gap:8px; padding:0 6px;}
+  .brand .mark{font-family:var(--font-display); font-style:italic; font-weight:500; font-size:20px;}
+  .brand .yr{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft); letter-spacing:.02em;}
+  nav.railnav{display:flex; flex-direction:column; gap:2px;}
+  .railnav button{
+    display:flex; align-items:center; gap:10px;
+    background:none; border:none; text-align:left;
+    padding:9px 10px; border-radius:5px;
+    color:var(--ink-soft); font-size:13.5px; font-weight:500;
+  }
+  .railnav button svg{width:16px;height:16px; flex-shrink:0; opacity:.8;}
+  .railnav button:hover{background:var(--paper-hover); color:var(--ink);}
+  .railnav button.active{background:var(--ink); color:var(--paper);}
+  .railnav button.active svg{opacity:1;}
+  .rail-footer{margin-top:auto; padding:0 6px; display:flex; flex-direction:column; gap:10px;}
+  .who{display:flex; align-items:center; gap:9px;}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;flex-shrink:0;}
+  .who-txt{line-height:1.25;}
+  .who-txt .nm{font-size:13px; font-weight:600;}
+  .who-txt .sub{font-size:11px; color:var(--ink-soft);}
+  .themebtn{background:none;border:1px solid var(--rule); border-radius:5px; padding:6px 8px; font-size:11.5px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;}
+  .themebtn:hover{color:var(--ink); border-color:var(--ink-soft);}
+ 
+  main.view{flex:1; min-width:0; padding:26px 34px 60px; max-width:980px;}
+  .masthead{display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:16px; border-bottom:1px solid var(--rule); margin-bottom:22px; gap:20px; flex-wrap:wrap;}
+  .masthead .date{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); letter-spacing:.02em; margin-bottom:6px;}
+  .masthead h1{font-size:26px;}
+  .masthead .lede{color:var(--ink-soft); font-size:13.5px; margin-top:4px; max-width:46ch;}
+ 
+  section.block{padding:22px 0; border-bottom:1px solid var(--rule);}
+  section.block:last-child{border-bottom:none;}
+  .block-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; gap:12px; flex-wrap:wrap;}
+  .block-head h2{font-size:16.5px;}
+  .block-head .count{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft);}
+ 
+  .btn{
+    background:var(--ink); color:var(--paper); border:none; border-radius:5px;
+    padding:8px 14px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover{opacity:.88;}
+  .btn.ghost{background:none; color:var(--ink); border:1px solid var(--rule);}
+  .btn.ghost:hover{border-color:var(--ink-soft);}
+  .btn.small{padding:5px 10px; font-size:12px;}
+  .btn.danger{background:none; color:var(--ember); border:1px solid var(--ember-soft);}
+ 
+  /* ---------- stat strip ---------- */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid var(--rule); border-radius:6px; overflow:hidden;}
+  .stat{padding:14px 16px; border-right:1px solid var(--rule);}
+  .stat:last-child{border-right:none;}
+  .stat .num{font-family:var(--font-mono); font-size:24px; font-weight:600; line-height:1;}
+  .stat .lbl{font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+  .stat.warn .num{color:var(--ember);}
+  .stat.good .num{color:var(--moss);}
+ 
+  /* ---------- forecast ---------- */
+  .forecast-strip{display:flex; gap:8px; align-items:flex-end; height:150px; padding:10px 4px 0;}
+  .fbar-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; height:100%; justify-content:flex-end;}
+  .fbar-track{width:100%; max-width:46px; height:100px; display:flex; align-items:flex-end; background:var(--paper-raised); border-radius:4px; overflow:hidden;}
+  .fbar{width:100%; border-radius:4px 4px 0 0; background:var(--ink-soft); transition:height .3s ease;}
+  .fbar.heavy{background:var(--ember);}
+  .fbar.med{background:var(--gold);}
+  .fbar.light{background:var(--moss);}
+  .fday{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft);}
+  .fhrs{font-family:var(--font-mono); font-size:11.5px; font-weight:600;}
+  .forecast-alert{margin-top:16px; padding:12px 14px; background:var(--ember-soft); border-left:3px solid var(--ember); border-radius:4px; font-size:13px;}
+  .forecast-alert b{font-weight:600;}
+  .forecast-note{font-size:11.5px; color:var(--ink-soft); margin-top:10px; max-width:60ch;}
+ 
+  /* ---------- lists ---------- */
+  .rowlist{display:flex; flex-direction:column;}
+  .row{
+    display:flex; align-items:center; gap:12px; padding:11px 4px;
+    border-bottom:1px solid var(--rule);
+  }
+  .rowlist .row:last-child{border-bottom:none;}
+  .row .chk{width:17px; height:17px; border:1.5px solid var(--ink-soft); border-radius:50%; flex-shrink:0; background:none; padding:0; display:flex; align-items:center; justify-content:center;}
+  .row .chk.done{background:var(--moss); border-color:var(--moss); color:var(--surface);}
+  .row .chk svg{width:10px;height:10px;}
+  .row .main{flex:1; min-width:0;}
+  .row .nm{font-size:13.5px; font-weight:600; cursor:pointer;}
+  .row .nm.struck{text-decoration:line-through; color:var(--ink-soft); font-weight:500;}
+  .row .meta{font-size:11.5px; color:var(--ink-soft); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap;}
+  .tag{display:inline-flex; align-items:center; gap:4px; padding:1px 7px; border-radius:20px; font-size:10.5px; font-weight:600; white-space:nowrap;}
+  .row .due{font-family:var(--font-mono); font-size:12px; text-align:right; min-width:64px; color:var(--ink-soft);}
+  .row .due.over{color:var(--ember); font-weight:600;}
+  .row .due.today{color:var(--gold); font-weight:600;}
+  .row .hrs{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); min-width:44px; text-align:right;}
+  .empty{padding:20px 4px; color:var(--ink-soft); font-size:13px;}
+ 
+  .prog-bar{height:5px; background:var(--paper-raised); border-radius:4px; overflow:hidden; margin-top:6px;}
+  .prog-fill{height:100%; background:var(--moss); border-radius:4px;}
+ 
+  /* ---------- assignments toolbar/filter ---------- */
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center;}
+  .toolbar select, .toolbar input[type=search]{
+    border:1px solid var(--rule); background:var(--surface); border-radius:5px; padding:7px 10px; font-size:12.5px; color:var(--ink);
+  }
+  .toolbar input[type=search]{flex:1; min-width:120px;}
+ 
+  /* ---------- assignment detail row (assignments page) ---------- */
+  .a-row{border:1px solid var(--rule); border-radius:6px; padding:14px 16px; margin-bottom:10px; background:var(--surface);}
+  .a-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start;}
+  .a-title{font-size:14.5px; font-weight:600;}
+  .a-title.struck{text-decoration:line-through; color:var(--ink-soft);}
+  .a-tags{display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;}
+  .a-actions{display:flex; gap:6px; flex-shrink:0;}
+  .a-actions button{background:none; border:1px solid var(--rule); border-radius:5px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft);}
+  .a-actions button:hover{color:var(--ink); border-color:var(--ink-soft);}
+  .a-actions button svg{width:14px;height:14px;}
+  .a-bottom{display:flex; justify-content:space-between; align-items:center; margin-top:10px; gap:12px;}
+  .a-notes{font-size:12.5px; color:var(--ink-soft); margin-top:8px; max-width:70ch;}
+  .subtasks{margin-top:10px; display:flex; flex-direction:column; gap:5px;}
+  .subtask{display:flex; align-items:center; gap:8px; font-size:12.5px;}
+  .subtask .chk{width:14px;height:14px;}
+  .subtask.done span{text-decoration:line-through; color:var(--ink-soft);}
+ 
+  /* ---------- panel (slide-over form) ---------- */
+  .overlay{position:fixed; inset:0; background:rgba(20,24,31,.35); display:none; align-items:stretch; justify-content:flex-end; z-index:40;}
+  .overlay.open{display:flex;}
+  .panel{
+    width:min(440px, 100vw); background:var(--surface); height:100%;
+    padding:22px 24px calc(24px + env(safe-area-inset-bottom,0px));
+    overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,.12);
+  }
+  .panel h3{font-size:18px; margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; text-transform:none;}
+  .field input, .field select, .field textarea{
+    width:100%; border:1px solid var(--rule); border-radius:5px; padding:8px 10px; background:var(--paper); color:var(--ink);
+  }
+  .field textarea{resize:vertical; min-height:60px;}
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+  .panel-close{background:none; border:none; float:right; color:var(--ink-soft); font-size:20px; line-height:1; padding:2px;}
+  .panel-actions{display:flex; gap:8px; margin-top:18px;}
+  .suggest-box{border:1px dashed var(--rule); border-radius:6px; padding:12px; margin-top:6px; background:var(--paper);}
+  .suggest-box ul{margin:8px 0 0; padding-left:18px; font-size:12.5px;}
+  .suggest-box li{margin-bottom:4px;}
+ 
+  /* ---------- calendar ---------- */
+  .cal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .cal-nav{display:flex; align-items:center; gap:10px;}
+  .cal-nav button{background:none; border:1px solid var(--rule); border-radius:5px; width:28px; height:28px; display:flex; align-items:center; justify-content:center;}
+  .cal-title{font-family:var(--font-display); font-size:17px;}
+  .cal-toggle{display:flex; border:1px solid var(--rule); border-radius:5px; overflow:hidden;}
+  .cal-toggle button{background:none; border:none; padding:6px 12px; font-size:12px; font-weight:600; color:var(--ink-soft);}
+  .cal-toggle button.active{background:var(--ink); color:var(--paper);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); border-top:1px solid var(--rule); border-left:1px solid var(--rule);}
+  .cal-dow{font-family:var(--font-mono); font-size:10px; text-align:center; color:var(--ink-soft); padding:6px 0; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+  .cal-cell{min-height:84px; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:6px; cursor:pointer; position:relative;}
+  .cal-cell:hover{background:var(--paper-hover);}
+  .cal-cell.out{opacity:.35;}
+  .cal-cell.today{background:var(--gold-soft);}
+  .cal-cell.selected{outline:2px solid var(--ink); outline-offset:-2px;}
+  .cal-cell .dnum{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft);}
+  .cal-chip{font-size:9.5px; padding:1px 5px; border-radius:3px; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;}
+  .cal-more{font-size:9.5px; color:var(--ink-soft); margin-top:2px;}
+  .cal-agenda{margin-top:20px;}
+ 
+  /* ---------- projects ---------- */
+  .proj{border:1px solid var(--rule); border-radius:6px; padding:16px 18px; margin-bottom:14px; background:var(--surface);}
+  .proj-top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+  .proj-name{font-size:15.5px; font-weight:600;}
+  .proj-meta{font-size:12px; color:var(--ink-soft); margin-top:3px;}
+  .proj-pct{font-family:var(--font-mono); font-size:20px; font-weight:600;}
+  .milestones{margin-top:14px; display:flex; flex-direction:column; gap:7px;}
+  .milestone{display:flex; align-items:center; gap:9px; font-size:13px;}
+  .milestone .mdate{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); margin-left:auto;}
+  .milestone.done span:not(.mdate){text-decoration:line-through; color:var(--ink-soft);}
+  .add-milestone{display:flex; gap:6px; margin-top:10px;}
+  .add-milestone input{flex:1; border:1px solid var(--rule); border-radius:5px; padding:6px 9px; font-size:12.5px; background:var(--paper);}
+  .add-milestone input[type=date]{flex:none; width:130px;}
+ 
+  /* ---------- onboarding ---------- */
+  #auth{min-height:100vh; min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .authcard{width:100%; max-width:420px;}
+  .authcard .kicker{font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); letter-spacing:.03em; margin-bottom:10px;}
+  .authcard h1{font-size:30px; font-style:italic; margin-bottom:6px;}
+  .authcard p.sub{color:var(--ink-soft); font-size:13.5px; margin-bottom:26px; max-width:40ch;}
+  .step{display:none;}
+  .step.active{display:block;}
+  .subj-add{display:flex; gap:6px; margin-bottom:10px;}
+  .subj-add input, .subj-add select{border:1px solid var(--rule); border-radius:5px; padding:7px 9px; font-size:12.5px; background:var(--paper);}
+  .subj-add input{flex:1;}
+  .subj-chip{display:flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid var(--rule); border-radius:5px; margin-bottom:6px; font-size:12.5px;}
+  .subj-chip .x{margin-left:auto; color:var(--ink-soft); background:none; border:none;}
+  .step-actions{display:flex; justify-content:space-between; margin-top:22px;}
+  .dots{display:flex; gap:5px; justify-content:center; margin-top:20px;}
+  .dots span{width:6px;height:6px;border-radius:50%; background:var(--rule);}
+  .dots span.on{background:var(--ink);}
+ 
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper); padding:10px 18px; border-radius:6px; font-size:13px; z-index:60; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-4px);}
+ 
+  @media (max-width: 860px){
+    .rail{position:fixed; left:0; bottom:0; top:auto; width:100%; height:auto; flex-direction:row; align-items:center; padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px)); border-right:none; border-top:1px solid var(--rule); z-index:30; background:var(--paper); gap:0; justify-content:space-between;}
+    .brand,.rail-footer{display:none;}
+    nav.railnav{flex-direction:row; width:100%; justify-content:space-around;}
+    .railnav button{flex-direction:column; gap:3px; font-size:10px; padding:6px 4px;}
+    #app.ready{flex-direction:column;}
+    main.view{padding:20px 16px 90px; max-width:100%;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .stat{border-right:1px solid var(--rule);}
+    .stat:nth-child(2n){border-right:none;}
+    .stat:nth-child(n+3){border-top:1px solid var(--rule);}
+    .cal-cell{min-height:56px;}
+    .panel{width:100%;}
+  }
+</style>
+</head>
+<body>
+ 
+<div id="auth">
+  <div class="authcard">
+    <div id="auth-welcome">
+      <div class="kicker">IB PLANNER</div>
+      <h1>Know your workload<br>before it knows you.</h1>
+      <p class="sub">A planner built around how IB actually works: overlapping IAs, essays, labs and long-term projects — not just a to-do list.</p>
+      <button class="btn" id="btn-start" style="width:100%; justify-content:center; padding:11px;">Set up my planner</button>
+      <button class="btn ghost" id="btn-demo" style="width:100%; justify-content:center; padding:11px; margin-top:8px;">Load with sample data</button>
+    </div>
+ 
+    <form id="onboard" style="display:none;">
+      <div class="step active" data-step="1">
+        <div class="kicker">STEP 1 OF 3</div>
+        <h1 style="font-size:22px;">About you</h1>
+        <div class="field"><label>Name</label><input required id="ob-name" placeholder="e.g. Maya Chen"></div>
+        <div class="field-row">
+          <div class="field"><label>Grade</label><input required id="ob-grade" placeholder="e.g. 12"></div>
+          <div class="field"><label>Programme</label>
+            <select id="ob-year">
+              <option>DP1</option><option>DP2</option><option>MYP5</option>
+            </select>
+          </div>
+        </div>
+        <div class="step-actions"><span></span><button type="button" class="btn" data-next="2">Continue</button></div>
+      </div>
+ 
+      <div class="step" data-step="2">
+        <div class="kicker">STEP 2 OF 3</div>
+        <h1 style="font-size:22px;">Your subjects</h1>
+        <div class="subj-add">
+          <input id="subj-name" placeholder="Subject, e.g. Biology">
+          <select id="subj-level"><option>HL</option><option>SL</option></select>
+          <button type="button" class="btn small" id="subj-add-btn">Add</button>
+        </div>
+        <div id="subj-list"></div>
+        <div class="step-actions"><button type="button" class="btn ghost" data-prev="1">Back</button><button type="button" class="btn" data-next="3">Continue</button></div>
+      </div>
+ 
+      <div class="step" data-step="3">
+        <div class="kicker">STEP 3 OF 3</div>
+        <h1 style="font-size:22px;">Notification preferences</h1>
+        <p class="sub" style="margin-bottom:14px;">You can change these anytime in Settings.</p>
+        <label style="display:flex; gap:9px; align-items:flex-start; margin-bottom:10px; font-size:13px;"><input type="checkbox" id="ob-n1" checked style="margin-top:3px;"> Alert me about heavy workload days</label>
+        <label style="display:flex; gap:9px; align-items:flex-start; margin-bottom:10px; font-size:13px;"><input type="checkbox" id="ob-n2" checked style="margin-top:3px;"> Remind me about overdue work</label>
+        <label style="display:flex; gap:9px; align-items:flex-start; margin-bottom:10px; font-size:13px;"><input type="checkbox" id="ob-n3" checked style="margin-top:3px;"> Notify me before IB project milestones</label>
+        <div class="step-actions"><button type="button" class="btn ghost" data-prev="2">Back</button><button type="submit" class="btn">Finish setup</button></div>
+      </div>
+      <div class="dots"><span class="d1 on"></span><span class="d2"></span><span class="d3"></span></div>
+    </form>
+  </div>
+</div>
+ 
+<div id="app">
+  <aside class="rail">
+    <div class="brand"><span class="mark">IB Planner</span></div>
+    <nav class="railnav" id="nav">
+      <button data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+      <button data-view="assignments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2z"/></svg>Assignments</button>
+      <button data-view="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</button>
+      <button data-view="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5V6a2 2 0 0 1 2-2h8l6 6v9.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5z"/><path d="M14 4v5a1 1 0 0 0 1 1h5"/></svg>IB Projects</button>
+    </nav>
+    <div class="rail-footer">
+      <button class="themebtn" id="theme-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <span id="theme-label">Light mode</span>
+      </button>
+      <div class="who">
+        <div class="avatar" id="av"></div>
+        <div class="who-txt"><div class="nm" id="who-name"></div><div class="sub" id="who-sub"></div></div>
+      </div>
+    </div>
+  </aside>
+  <main class="view" id="view"></main>
+</div>
+ 
+<div class="overlay" id="panel-overlay"><div class="panel" id="panel"></div></div>
+<div class="toast" id="toast"></div>
+ 
+<script>
+(function(){
+"use strict";
+ 
+/* ---------------------------------------------------------------
+   IB PLANNER — prototype front-end.
+   All data lives in memory for this demo (see docs for the real
+   Supabase/Postgres schema this is modeled on). Reloading the page
+   resets to a fresh onboarding flow.
+------------------------------------------------------------------*/
+ 
+const PALETTE = [
+  {bg:'#EFE0D8', fg:'#B24623'}, // ember
+  {bg:'#DCE6DA', fg:'#3E6350'}, // moss
+  {bg:'#E7E1CB', fg:'#93701F'}, // gold
+  {bg:'#E4DAE2', fg:'#6A4A63'}, // plum
+  {bg:'#D8E4E4', fg:'#2C6363'}, // teal
+  {bg:'#DCE0EA', fg:'#3B4E82'}, // indigo
+  {bg:'#EAD9D9', fg:'#8B3A3A'}, // brick
+  {bg:'#E3E6D2', fg:'#5C6B2E'}, // olive
+];
+const TYPES = ["Homework","IA","EE","TOK","CAS","Lab","Essay","Project","Quiz","Test","Presentation","Reading","Other"];
+const PROJECT_TYPES = ["Internal Assessment","Extended Essay","TOK","CAS","Personal Project","Major Coursework"];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const uid = () => Math.random().toString(36).slice(2,10);
+ 
+function todayStart(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function dayKey(d){ return d.toISOString().slice(0,10); }
+function fmtShort(d){ return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+function fmtLong(d){ return d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'}); }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+ 
+/* ---------------------- state ---------------------- */
+let state = {
+  user: null, // {name, grade, program, subjects:[{id,name,level,color}]}
+  assignments: [], // {id,name,subjectId,type,due(Date),estHours,priority,progress,status,notes,subtasks,attachment}
+  projects: [],    // {id,name,type,subjectId,deadline,notes,milestones:[{id,name,date,done}],overridePct}
+  sessions: [],    // {id,assignmentId,plannedMin,actualMin,date}
+  view:'dashboard',
+  calMonth: (()=>{const d=todayStart(); d.setDate(1); return d;})(),
+  calMode:'month',
+  calSelected: todayStart(),
+  theme: 'auto'
+};
+ 
+function subjectById(id){ return state.user.subjects.find(s=>s.id===id); }
+function projectById(id){ return state.projects.find(p=>p.id===id); }
+ 
+/* ---------------------- seed data ---------------------- */
+function seedDemo(){
+  const subs = [
+    {id:uid(), name:'Biology', level:'HL'},
+    {id:uid(), name:'History', level:'HL'},
+    {id:uid(), name:'Math AA', level:'SL'},
+    {id:uid(), name:'English A', level:'SL'},
+    {id:uid(), name:'Spanish Ab Initio', level:'SL'},
+    {id:uid(), name:'Chemistry', level:'SL'},
+  ].map((s,i)=>({...s, color:PALETTE[i%PALETTE.length]}));
+  state.user = {name:'Maya Chen', grade:'12', program:'DP2', subjects:subs, notif:{heavy:true, overdue:true, milestones:true}};
+ 
+  const T = todayStart();
+  const [bio,hist,math,eng,span,chem] = subs;
+  const A = (name,subjId,type,dueOffset,estHours,priority,progress,status,notes,subtasks)=>({
+    id:uid(), name, subjectId:subjId.id, type, due:addDays(T,dueOffset), estHours, priority,
+    progress: progress||0, status: status||'not-started', notes: notes||'', attachment:'',
+    subtasks: (subtasks||[]).map(t=>({id:uid(), text:t, done:false}))
+  });
+ 
+  state.assignments = [
+    A('Photosynthesis lab write-up', bio, 'Lab', -2, 2, 'high', 40, 'in-progress', 'Include light-intensity graph.'),
+    A('Ch. 12 problem set', math, 'Homework', 0, 1, 'med', 0),
+    A('Cold War essay outline', hist, 'Essay', 0, 1.5, 'high', 20, 'in-progress'),
+    A('Vocabulary quiz — unit 4', span, 'Quiz', 1, 0.5, 'low', 0),
+    A('Titration practical', chem, 'Lab', 2, 2.5, 'med', 0),
+    A('Cold War essay — full draft', hist, 'Essay', 4, 4, 'high', 0, 'not-started', '', ['Choose or refine your thesis','Research and gather sources','Create an outline','Write the introduction','Write the body / analysis','Write the conclusion','Revise for structure and argument','Proofread and format citations']),
+    A('Paper 1 practice — commentary', eng, 'Essay', 4, 2, 'med', 0),
+    A('Genetics unit test', bio, 'Test', 5, 3, 'high', 0),
+    A('Reading — Act III', eng, 'Reading', 1, 1, 'low', 0),
+    A('Enzyme kinetics IA draft', bio, 'IA', 6, 3, 'high', 10, 'in-progress'),
+    A('Presentation — Spanish culture', span, 'Presentation', 3, 1.5, 'med', 60, 'in-progress'),
+  ];
+ 
+  state.projects = [
+    {id:uid(), name:'Extended Essay — Cold War Historiography', type:'Extended Essay', subjectId:hist.id,
+     deadline:addDays(T,120), notes:'Supervisor: Mr. Alden. Focus on Soviet archival sources.',
+     milestones:[
+       {id:uid(), name:'Research question approved', date:addDays(T,-40), done:true},
+       {id:uid(), name:'Reflection 1 (supervisor meeting)', date:addDays(T,-10), done:true},
+       {id:uid(), name:'First full draft', date:addDays(T,25), done:false},
+       {id:uid(), name:'Reflection 2', date:addDays(T,35), done:false},
+       {id:uid(), name:'Final draft submitted', date:addDays(T,110), done:false},
+     ]},
+    {id:uid(), name:'Biology IA — Enzyme Kinetics', type:'Internal Assessment', subjectId:bio.id,
+     deadline:addDays(T,45), notes:'Data collection needs lab access — book slot early.',
+     milestones:[
+       {id:uid(), name:'Research question finalized', date:addDays(T,-15), done:true},
+       {id:uid(), name:'Data collection complete', date:addDays(T,10), done:false},
+       {id:uid(), name:'Draft analysis', date:addDays(T,25), done:false},
+       {id:uid(), name:'Final submission', date:addDays(T,45), done:false},
+     ]},
+    {id:uid(), name:'TOK Essay', type:'TOK', subjectId:null,
+     deadline:addDays(T,70), notes:'Prescribed title #3.',
+     milestones:[
+       {id:uid(), name:'Title chosen', date:addDays(T,-5), done:true},
+       {id:uid(), name:'Outline reviewed', date:addDays(T,15), done:false},
+       {id:uid(), name:'Final essay due', date:addDays(T,70), done:false},
+     ]},
+    {id:uid(), name:'CAS Portfolio — Term 2', type:'CAS', subjectId:null,
+     deadline:addDays(T,60), notes:'Need 2 more experience reflections.',
+     milestones:[
+       {id:uid(), name:'Creativity reflection', date:addDays(T,8), done:false},
+       {id:uid(), name:'Service reflection', date:addDays(T,20), done:false},
+       {id:uid(), name:'Portfolio review with coordinator', date:addDays(T,60), done:false},
+     ]},
+  ];
+ 
+  state.sessions = [
+    {id:uid(), assignmentId: state.assignments[0].id, plannedMin:90, actualMin:130, date:addDays(T,-3)},
+  ];
+}
+ 
+/* ---------------------- workload engine ---------------------- */
+function computeForecast(days=7){
+  const T = todayStart();
+  const buckets = Array.from({length:days},(_,i)=>({date:addDays(T,i), hours:0}));
+  let overdueHours = 0;
+  state.assignments.forEach(a=>{
+    if(a.status==='completed') return;
+    const due = new Date(a.due); due.setHours(0,0,0,0);
+    const remaining = a.estHours * (1 - (a.progress||0)/100);
+    if(remaining<=0) return;
+    if(due < T){ overdueHours += remaining; return; }
+    const spanDays = Math.max(1, daysBetween(T,due)+1);
+    const perDay = remaining/spanDays;
+    for(let i=0;i<spanDays;i++){
+      if(i<days) buckets[i].hours += perDay;
+    }
+  });
+  return {buckets, overdueHours};
+}
+ 
+function lists(){
+  const T = todayStart();
+  const notCompleted = state.assignments.filter(a=>a.status!=='completed');
+  const overdue = notCompleted.filter(a=> new Date(a.due).setHours(0,0,0,0) < T).sort((a,b)=>a.due-b.due);
+  const today = notCompleted.filter(a=> new Date(a.due).setHours(0,0,0,0) === +T);
+  const upcoming = notCompleted.filter(a=>{ const d=new Date(a.due).setHours(0,0,0,0); return d>+T && d<=+addDays(T,6); }).sort((a,b)=>a.due-b.due);
+  const completedCount = state.assignments.filter(a=>a.status==='completed').length;
+  const pct = state.assignments.length? Math.round(completedCount/state.assignments.length*100):0;
+  return {overdue, today, upcoming, pct, completedCount, total: state.assignments.length};
+}
+ 
+function upcomingMilestones(days=30){
+  const T=todayStart(); const out=[];
+  state.projects.forEach(p=>{
+    p.milestones.forEach(m=>{
+      if(!m.done){
+        const d = new Date(m.date); d.setHours(0,0,0,0);
+        if(d>=T && d<=addDays(T,days)) out.push({project:p, milestone:m});
+      }
+    });
+  });
+  out.sort((a,b)=>a.milestone.date-b.milestone.date);
+  return out;
+}
+ 
+/* ---------------------- rendering helpers ---------------------- */
+function subjTag(subjId){
+  const s = subjectById(subjId);
+  if(!s) return `<span class="tag" style="background:var(--paper-raised); color:var(--ink-soft);">General</span>`;
+  return `<span class="tag" style="background:${s.color.bg}; color:${s.color.fg};">${esc(s.name)}</span>`;
+}
+function typeTag(t){
+  return `<span class="tag" style="background:var(--paper-raised); color:var(--ink-soft);">${esc(t)}</span>`;
+}
+function prioDot(p){
+  const c = p==='high' ? 'var(--ember)' : p==='med' ? 'var(--gold)' : 'var(--moss)';
+  return `<span title="${p} priority" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c};"></span>`;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function dueLabel(due){
+  const T=todayStart(); const d=new Date(due); d.setHours(0,0,0,0);
+  const diff = daysBetween(T,d);
+  if(diff<0) return {txt:`${fmtShort(d)} · overdue`, cls:'over'};
+  if(diff===0) return {txt:'Today', cls:'today'};
+  if(diff===1) return {txt:'Tomorrow', cls:''};
+  return {txt:fmtShort(d), cls:''};
+}
+ 
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'),2200);
+}
+ 
+/* ---------------------- assignment row (shared) ---------------------- */
+function assignmentRow(a, opts){
+  opts = opts||{};
+  const dl = dueLabel(a.due);
+  const done = a.status==='completed';
+  return `<div class="row" data-id="${a.id}">
+    <button class="chk ${done?'done':''}" data-act="toggle-complete" data-id="${a.id}">${done?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>':''}</button>
+    <div class="main">
+      <div class="nm ${done?'struck':''}" data-act="open-edit" data-id="${a.id}">${esc(a.name)}</div>
+      <div class="meta">${subjTag(a.subjectId)} ${typeTag(a.type)} ${prioDot(a.priority)}</div>
+    </div>
+    <div class="hrs mono">${a.estHours}h</div>
+    <div class="due mono ${dl.cls}">${dl.txt}</div>
+  </div>`;
+}
+ 
+/* ---------------------- DASHBOARD ---------------------- */
+function renderDashboard(){
+  const L = lists();
+  const {buckets, overdueHours} = computeForecast(7);
+  const maxH = Math.max(1, ...buckets.map(b=>b.hours));
+  const heavyIdx = buckets.reduce((best,b,i)=> b.hours>buckets[best].hours? i:best, 0);
+  const heavyDay = buckets[heavyIdx];
+  const showAlert = heavyDay.hours >= 4;
+ 
+  const totalWeekHours = buckets.reduce((s,b)=>s+b.hours,0);
+  const milestones = upcomingMilestones(21);
+ 
+  const hour = new Date().getHours();
+  const greeting = hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+ 
+  document.getElementById('view').innerHTML = `
+    <div class="masthead">
+      <div>
+        <div class="date mono">${fmtLong(new Date())}</div>
+        <h1>${greeting}, ${esc(state.user.name.split(' ')[0])}</h1>
+        <div class="lede">Here's what actually needs your attention right now.</div>
+      </div>
+    </div>
+ 
+    <section class="block">
+      <div class="stats">
+        <div class="stat ${L.overdue.length? 'warn':''}"><div class="num">${L.overdue.length}</div><div class="lbl">Overdue</div></div>
+        <div class="stat"><div class="num">${L.today.length}</div><div class="lbl">Due today</div></div>
+        <div class="stat good"><div class="num">${L.pct}%</div><div class="lbl">Complete (${L.completedCount}/${L.total})</div></div>
+        <div class="stat"><div class="num">${totalWeekHours.toFixed(1)}h</div><div class="lbl">Est. work, next 7 days</div></div>
+      </div>
+    </section>
+ 
+    <section class="block">
+      <div class="block-head"><h2>Workload forecast</h2><span class="count">next 7 days</span></div>
+      <div class="forecast-strip">
+        ${buckets.map((b,i)=>{
+          const h = Math.max(4, (b.hours/maxH)*100);
+          const cls = b.hours>=4?'heavy':b.hours>=2?'med':'light';
+          const isToday = i===0;
+          return `<div class="fbar-col">
+            <div class="fhrs">${b.hours>0?b.hours.toFixed(1):'—'}</div>
+            <div class="fbar-track"><div class="fbar ${cls}" style="height:${h}%"></div></div>
+            <div class="fday">${isToday?'TODAY':DOW[b.date.getDay()].toUpperCase()}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${showAlert ? `<div class="forecast-alert">You have approximately <b>${heavyDay.hours.toFixed(1)} hours</b> of estimated work landing on <b>${heavyDay.date.getTime()===+todayStart()?'today':fmtLong(heavyDay.date)}</b>. Consider starting one of that day's assignments earlier.</div>` : ''}
+      ${overdueHours>0 ? `<div class="forecast-note">Doesn't include ${overdueHours.toFixed(1)}h of overdue work — see below.</div>` : ''}
+      <div class="forecast-note">Hours are spread evenly across the days between today and each assignment's due date, based on your time estimates and progress — not just dumped on the deadline.</div>
+    </section>
+ 
+    ${L.overdue.length? `<section class="block">
+      <div class="block-head"><h2 style="color:var(--ember);">Overdue</h2><span class="count">${L.overdue.length}</span></div>
+      <div class="rowlist">${L.overdue.map(a=>assignmentRow(a)).join('')}</div>
+    </section>` : ''}
+ 
+    <section class="block">
+      <div class="block-head"><h2>Today</h2><span class="count">${L.today.length}</span></div>
+      <div class="rowlist">${L.today.length? L.today.map(a=>assignmentRow(a)).join('') : '<div class="empty">Nothing due today. Good moment to get ahead on Wednesday.</div>'}</div>
+    </section>
+ 
+    <section class="block">
+      <div class="block-head"><h2>Upcoming</h2><span class="count">next 6 days</span></div>
+      <div class="rowlist">${L.upcoming.length? L.upcoming.map(a=>assignmentRow(a)).join('') : '<div class="empty">Nothing else on the horizon this week.</div>'}</div>
+    </section>
+ 
+    <section class="block">
+      <div class="block-head"><h2>Major IB deadlines ahead</h2><span class="count">next 3 weeks</span></div>
+      <div class="rowlist">
+        ${milestones.length? milestones.map(({project,milestone})=>`
+          <div class="row">
+            <div class="main">
+              <div class="nm">${esc(milestone.name)}</div>
+              <div class="meta"><span class="tag" style="background:var(--paper-raised); color:var(--ink-soft);">${esc(project.type)}</span> ${esc(project.name)}</div>
+            </div>
+            <div class="due mono">${fmtShort(milestone.date)}</div>
+          </div>`).join('') : '<div class="empty">No project milestones in the next three weeks.</div>'}
+      </div>
+    </section>
+  `;
+  wireRowActions();
+}
+ 
+/* ---------------------- ASSIGNMENTS ---------------------- */
+let aFilter = {subject:'all', type:'all', status:'all', q:''};
+function renderAssignments(){
+  const subs = state.user.subjects;
+  let items = state.assignments.slice();
+  if(aFilter.subject!=='all') items = items.filter(a=>a.subjectId===aFilter.subject);
+  if(aFilter.type!=='all') items = items.filter(a=>a.type===aFilter.type);
+  if(aFilter.status!=='all') items = items.filter(a=> aFilter.status==='completed'? a.status==='completed' : a.status!=='completed');
+  if(aFilter.q) items = items.filter(a=>a.name.toLowerCase().includes(aFilter.q.toLowerCase()));
+  items.sort((a,b)=> (a.status==='completed')-(b.status==='completed') || a.due-b.due);
+ 
+  document.getElementById('view').innerHTML = `
+    <div class="masthead">
+      <div><div class="date mono">ASSIGNMENTS</div><h1>Everything on your plate</h1></div>
+      <button class="btn" id="new-assignment">+ New assignment</button>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="f-q" placeholder="Search assignments…" value="${esc(aFilter.q)}">
+      <select id="f-subject"><option value="all">All subjects</option>${subs.map(s=>`<option value="${s.id}" ${aFilter.subject===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+      <select id="f-type"><option value="all">All types</option>${TYPES.map(t=>`<option ${aFilter.type===t?'selected':''}>${t}</option>`).join('')}</select>
+      <select id="f-status">
+        <option value="all" ${aFilter.status==='all'?'selected':''}>All statuses</option>
+        <option value="open" ${aFilter.status==='open'?'selected':''}>Not completed</option>
+        <option value="completed" ${aFilter.status==='completed'?'selected':''}>Completed</option>
+      </select>
+    </div>
+    <div>
+      ${items.length? items.map(a=>fullAssignmentCard(a)).join('') : '<div class="empty">No assignments match those filters.</div>'}
+    </div>
+  `;
+  document.getElementById('new-assignment').onclick = ()=>openAssignmentPanel(null);
+  document.getElementById('f-q').oninput = e=>{aFilter.q=e.target.value; renderAssignments();};
+  document.getElementById('f-subject').onchange = e=>{aFilter.subject=e.target.value; renderAssignments();};
+  document.getElementById('f-type').onchange = e=>{aFilter.type=e.target.value; renderAssignments();};
+  document.getElementById('f-status').onchange = e=>{aFilter.status=e.target.value; renderAssignments();};
+  wireRowActions();
+}
+ 
+function fullAssignmentCard(a){
+  const done = a.status==='completed';
+  const dl = dueLabel(a.due);
+  return `<div class="a-row">
+    <div class="a-top">
+      <div>
+        <div class="a-title ${done?'struck':''}">${esc(a.name)}</div>
+        <div class="a-tags">${subjTag(a.subjectId)} ${typeTag(a.type)} <span class="tag" style="background:var(--paper-raised); color:var(--ink-soft);">${prioDot(a.priority)} ${a.priority} priority</span> <span class="tag mono" style="background:var(--paper-raised); color:var(--ink-soft);">${a.estHours}h est.</span></div>
+      </div>
+      <div class="a-actions">
+        <button data-act="toggle-complete" data-id="${a.id}" title="${done?'Mark not done':'Mark complete'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button>
+        <button data-act="open-edit" data-id="${a.id}" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+        <button data-act="delete" data-id="${a.id}" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+      </div>
+    </div>
+    <div class="a-bottom">
+      <div style="flex:1; max-width:260px;"><div class="prog-bar"><div class="prog-fill" style="width:${a.progress}%"></div></div></div>
+      <div class="due mono ${dl.cls}">${fmtShort(a.due)} · ${dl.cls==='over'?'overdue':dl.cls==='today'?'today':dl.txt}</div>
+    </div>
+    ${a.notes? `<div class="a-notes">${esc(a.notes)}</div>`:''}
+    ${a.subtasks && a.subtasks.length? `<div class="subtasks">${a.subtasks.map(st=>`
+      <div class="subtask ${st.done?'done':''}"><button class="chk" style="width:14px;height:14px;" data-act="toggle-subtask" data-id="${a.id}" data-sid="${st.id}">${st.done?'✓':''}</button><span>${esc(st.text)}</span></div>
+    `).join('')}</div>`:''}
+  </div>`;
+}
+ 
+/* ---------------------- assignment panel (create/edit) ---------------------- */
+function openAssignmentPanel(id){
+  const editing = id? state.assignments.find(a=>a.id===id) : null;
+  const subs = state.user.subjects;
+  const panel = document.getElementById('panel');
+  panel._pendingSubtasks = null;
+  panel.innerHTML = `
+    <button class="panel-close" data-act="close-panel">&times;</button>
+    <h3>${editing?'Edit assignment':'New assignment'}</h3>
+    <div class="field"><label>Assignment name</label><input id="p-name" value="${editing?esc(editing.name):''}" placeholder="e.g. History essay — causes of WWI"></div>
+    <div class="field-row">
+      <div class="field"><label>Subject</label><select id="p-subject">${subs.map(s=>`<option value="${s.id}" ${editing&&editing.subjectId===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Type</label><select id="p-type">${TYPES.map(t=>`<option ${editing&&editing.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Due date</label><input type="date" id="p-due" value="${editing? dayKey(editing.due) : dayKey(todayStart())}"></div>
+      <div class="field"><label>Est. hours</label><input type="number" min="0" step="0.5" id="p-hours" value="${editing?editing.estHours:1}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Priority</label><select id="p-priority"><option value="low" ${editing&&editing.priority==='low'?'selected':''}>Low</option><option value="med" ${!editing||editing.priority==='med'?'selected':''}>Medium</option><option value="high" ${editing&&editing.priority==='high'?'selected':''}>High</option></select></div>
+      <div class="field"><label>Progress (%)</label><input type="number" min="0" max="100" id="p-progress" value="${editing?editing.progress:0}"></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="p-notes" placeholder="Any details worth remembering">${editing?esc(editing.notes):''}</textarea></div>
+    <div class="field"><label>Attachment link (optional)</label><input id="p-attach" value="${editing?esc(editing.attachment||''):''}" placeholder="Paste a doc/drive link"></div>
+ 
+    <div class="field">
+      <label>Smart task breakdown</label>
+      <button type="button" class="btn ghost small" id="p-suggest">Suggest a breakdown</button>
+      <div id="p-suggest-box"></div>
+      ${editing && editing.subtasks && editing.subtasks.length ? `<div class="subtasks" style="margin-top:10px;">${editing.subtasks.map(st=>`<div class="subtask ${st.done?'done':''}"><span>• ${esc(st.text)}</span></div>`).join('')}</div>`:''}
+    </div>
+ 
+    <div class="panel-actions">
+      <button class="btn" id="p-save">${editing?'Save changes':'Create assignment'}</button>
+      ${editing?`<button class="btn danger" id="p-delete">Delete</button>`:''}
+    </div>
+  `;
+  document.getElementById('panel-overlay').classList.add('open');
+  document.querySelector('#panel [data-act=close-panel]').onclick = closePanel;
+ 
+  let pendingSubtasks = null;
+  document.getElementById('p-suggest').onclick = ()=>{
+    const type = document.getElementById('p-type').value;
+    const name = document.getElementById('p-name').value || 'this assignment';
+    pendingSubtasks = suggestBreakdown(type);
+    document.getElementById('p-suggest-box').innerHTML = `
+      <div class="suggest-box">
+        <div style="font-size:12.5px; font-weight:600;">Suggested steps for "${esc(name)}" — review before adding:</div>
+        <ul>${pendingSubtasks.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button type="button" class="btn small" id="p-approve">Approve & add</button>
+          <button type="button" class="btn ghost small" id="p-reject">Discard</button>
+        </div>
+      </div>`;
+    document.getElementById('p-approve').onclick = ()=>{
+      if(editing){
+        editing.subtasks = (editing.subtasks||[]).concat(pendingSubtasks.map(t=>({id:uid(),text:t,done:false})));
+      } else {
+        panel._pendingSubtasks = pendingSubtasks;
+      }
+      toast('Steps added — you can check them off from Assignments.');
+      document.getElementById('p-suggest-box').innerHTML = '';
+    };
+    document.getElementById('p-reject').onclick = ()=>{ document.getElementById('p-suggest-box').innerHTML=''; };
+  };
+ 
+  document.getElementById('p-save').onclick = ()=>{
+    const name = document.getElementById('p-name').value.trim();
+    if(!name){ toast('Give the assignment a name first.'); return; }
+    const data = {
+      name,
+      subjectId: document.getElementById('p-subject').value,
+      type: document.getElementById('p-type').value,
+      due: new Date(document.getElementById('p-due').value+'T00:00:00'),
+      estHours: parseFloat(document.getElementById('p-hours').value)||0,
+      priority: document.getElementById('p-priority').value,
+      progress: Math.max(0,Math.min(100, parseInt(document.getElementById('p-progress').value)||0)),
+      notes: document.getElementById('p-notes').value.trim(),
+      attachment: document.getElementById('p-attach').value.trim(),
+    };
+    data.status = data.progress>=100? 'completed' : (data.progress>0? 'in-progress':'not-started');
+    if(editing){
+      Object.assign(editing, data);
+      toast('Assignment updated.');
+    } else {
+      state.assignments.push({id:uid(), subtasks: panel._pendingSubtasks? panel._pendingSubtasks.map(t=>({id:uid(),text:t,done:false})) : [], ...data});
+      toast('Assignment added.');
+    }
+    closePanel();
+    render();
+  };
+  if(editing){
+    document.getElementById('p-delete').onclick = ()=>{
+      state.assignments = state.assignments.filter(a=>a.id!==editing.id);
+      closePanel(); render(); toast('Assignment deleted.');
+    };
+  }
+}
+function closePanel(){ document.getElementById('panel-overlay').classList.remove('open'); }
+ 
+function suggestBreakdown(type){
+  const essayLike = ['Essay','IA','EE'];
+  if(essayLike.includes(type)) return ['Choose or refine your topic/question','Research and gather sources','Create an outline','Write the introduction','Write the body / analysis','Write the conclusion','Revise for structure and argument','Proofread and format citations'];
+  if(type==='Lab') return ['Write your hypothesis','Confirm the procedure/variables','Collect data','Analyze the data','Write results & discussion','Proofread and format'];
+  if(type==='Presentation') return ['Outline key points','Build slides/visuals','Write speaker notes','Rehearse timing','Final run-through'];
+  if(type==='Project') return ['Break the work into milestones','Draft a plan','Build the core content','Review and refine','Finalize and submit'];
+  if(type==='TOK') return ['Unpack the prescribed title','Choose real-life situations','Draft your argument','Get feedback','Revise and finalize'];
+  if(type==='Test'||type==='Quiz') return ['Review notes and past work','Make a summary sheet','Practice questions','Identify weak spots and redo those'];
+  return ['Review the instructions','Do the core work','Check for mistakes','Submit'];
+}
+ 
+/* ---------------------- CALENDAR ---------------------- */
+function renderCalendar(){
+  const mode = state.calMode;
+  document.getElementById('view').innerHTML = `
+    <div class="masthead">
+      <div><div class="date mono">CALENDAR</div><h1>${esc(state.user.name.split(' ')[0])}'s schedule</h1></div>
+    </div>
+    <div class="cal-head">
+      <div class="cal-nav">
+        <button id="cal-prev">&larr;</button>
+        <div class="cal-title" id="cal-title"></div>
+        <button id="cal-next">&rarr;</button>
+        <button class="btn ghost small" id="cal-today">Today</button>
+      </div>
+      <div class="cal-toggle">
+        <button data-mode="month" class="${mode==='month'?'active':''}">Month</button>
+        <button data-mode="week" class="${mode==='week'?'active':''}">Week</button>
+        <button data-mode="day" class="${mode==='day'?'active':''}">Day</button>
+      </div>
+    </div>
+    <div id="cal-body"></div>
+    <div class="cal-agenda" id="cal-agenda"></div>
+  `;
+  document.querySelectorAll('.cal-toggle button').forEach(b=> b.onclick=()=>{ state.calMode=b.dataset.mode; renderCalendar(); });
+  document.getElementById('cal-today').onclick = ()=>{ state.calSelected=todayStart(); const d=todayStart(); d.setDate(1); state.calMonth=d; renderCalendar(); };
+  document.getElementById('cal-prev').onclick = ()=> shiftCal(-1);
+  document.getElementById('cal-next').onclick = ()=> shiftCal(1);
+ 
+  if(mode==='month') renderCalMonth();
+  else if(mode==='week') renderCalWeek();
+  else renderCalDay();
+  renderAgenda();
+}
+function shiftCal(dir){
+  if(state.calMode==='month'){ const d=new Date(state.calMonth); d.setMonth(d.getMonth()+dir); state.calMonth=d; }
+  else if(state.calMode==='week'){ state.calSelected = addDays(state.calSelected, dir*7); }
+  else { state.calSelected = addDays(state.calSelected, dir); }
+  renderCalendar();
+}
+function assignmentsOn(d){
+  return state.assignments.filter(a=>{ const ad=new Date(a.due); ad.setHours(0,0,0,0); return +ad===+d; });
+}
+function renderCalMonth(){
+  const m = state.calMonth;
+  document.getElementById('cal-title').textContent = `${MONTHS[m.getMonth()]} ${m.getFullYear()}`;
+  const firstDow = new Date(m.getFullYear(), m.getMonth(),1).getDay();
+  const daysInMonth = new Date(m.getFullYear(), m.getMonth()+1,0).getDate();
+  const start = addDays(m, -firstDow);
+  const cells = [];
+  for(let i=0;i<42;i++) cells.push(addDays(start,i));
+  const T = todayStart();
+  document.getElementById('cal-body').innerHTML = `<div class="cal-grid">
+    ${DOW.map(d=>`<div class="cal-dow">${d.toUpperCase()}</div>`).join('')}
+    ${cells.map(d=>{
+      const out = d.getMonth()!==m.getMonth();
+      const items = assignmentsOn(d);
+      const isToday = +d===+T;
+      const isSel = +d===+state.calSelected;
+      return `<div class="cal-cell ${out?'out':''} ${isToday?'today':''} ${isSel?'selected':''}" data-date="${dayKey(d)}">
+        <div class="dnum">${d.getDate()}</div>
+        ${items.slice(0,3).map(a=>{const s=subjectById(a.subjectId); return `<div class="cal-chip" style="background:${s?s.color.bg:'var(--paper-raised)'}; color:${s?s.color.fg:'var(--ink-soft)'};">${esc(a.name)}</div>`}).join('')}
+        ${items.length>3?`<div class="cal-more">+${items.length-3} more</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.querySelectorAll('.cal-cell').forEach(c=> c.onclick=()=>{ state.calSelected = new Date(c.dataset.date+'T00:00:00'); renderCalendar(); });
+}
+function renderCalWeek(){
+  const start = addDays(state.calSelected, -state.calSelected.getDay());
+  document.getElementById('cal-title').textContent = `Week of ${fmtShort(start)}`;
+  const days = Array.from({length:7},(_,i)=>addDays(start,i));
+  document.getElementById('cal-body').innerHTML = `<div class="cal-grid" style="grid-template-columns:repeat(7,1fr);">
+    ${days.map(d=>`<div class="cal-dow">${DOW[d.getDay()].toUpperCase()} ${d.getDate()}</div>`).join('')}
+    ${days.map(d=>{
+      const items = assignmentsOn(d);
+      const isToday = +d===+todayStart(); const isSel = +d===+state.calSelected;
+      return `<div class="cal-cell ${isToday?'today':''} ${isSel?'selected':''}" style="min-height:140px;" data-date="${dayKey(d)}">
+        ${items.map(a=>{const s=subjectById(a.subjectId); return `<div class="cal-chip" style="background:${s?s.color.bg:'var(--paper-raised)'}; color:${s?s.color.fg:'var(--ink-soft)'};">${esc(a.name)}</div>`}).join('')}
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.querySelectorAll('.cal-cell').forEach(c=> c.onclick=()=>{ state.calSelected = new Date(c.dataset.date+'T00:00:00'); renderCalendar(); });
+}
+function renderCalDay(){
+  const d = state.calSelected;
+  document.getElementById('cal-title').textContent = fmtLong(d);
+  document.getElementById('cal-body').innerHTML = '';
+}
+function renderAgenda(){
+  const items = assignmentsOn(state.calSelected);
+  document.getElementById('cal-agenda').innerHTML = `
+    <div class="block-head"><h2>${state.calMode==='day'? fmtLong(state.calSelected) : fmtLong(state.calSelected)}</h2><span class="count">${items.length} due</span></div>
+    <div class="rowlist">${items.length? items.map(a=>assignmentRow(a)).join('') : '<div class="empty">Nothing due this day.</div>'}</div>
+  `;
+  wireRowActions();
+}
+ 
+/* ---------------------- PROJECTS ---------------------- */
+function renderProjects(){
+  document.getElementById('view').innerHTML = `
+    <div class="masthead">
+      <div><div class="date mono">IB PROJECTS</div><h1>Long-term work</h1><div class="lede">The big things — broken into pieces you can actually see progress on.</div></div>
+      <button class="btn" id="new-project">+ New project</button>
+    </div>
+    <div>${state.projects.length? state.projects.map(p=>projectCard(p)).join('') : '<div class="empty">No long-term projects yet.</div>'}</div>
+  `;
+  document.getElementById('new-project').onclick = openProjectPanel;
+  wireProjectActions();
+}
+function pctFor(p){
+  if(!p.milestones.length) return p.overridePct||0;
+  return Math.round(p.milestones.filter(m=>m.done).length/p.milestones.length*100);
+}
+function projectCard(p){
+  const s = p.subjectId? subjectById(p.subjectId):null;
+  const pct = pctFor(p);
+  const daysLeft = daysBetween(todayStart(), new Date(p.deadline));
+  return `<div class="proj" data-pid="${p.id}">
+    <div class="proj-top">
+      <div>
+        <div class="proj-name">${esc(p.name)}</div>
+        <div class="proj-meta">${esc(p.type)}${s?` · ${esc(s.name)}`:''} · due ${fmtShort(new Date(p.deadline))} ${daysLeft>=0?`(${daysLeft}d)`:'(overdue)'}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="proj-pct mono">${pct}%</div>
+        <button class="btn ghost small" data-act="del-project" data-id="${p.id}" style="margin-top:6px;">Delete</button>
+      </div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+    ${p.notes?`<div class="a-notes">${esc(p.notes)}</div>`:''}
+    <div class="milestones">
+      ${p.milestones.map(m=>`<div class="milestone ${m.done?'done':''}">
+        <button class="chk ${m.done?'done':''}" style="width:15px;height:15px;" data-act="toggle-milestone" data-pid="${p.id}" data-mid="${m.id}">${m.done?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:9px;height:9px;"><path d="M20 6L9 17l-5-5"/></svg>':''}</button>
+        <span>${esc(m.name)}</span>
+        <span class="mdate">${fmtShort(new Date(m.date))}</span>
+      </div>`).join('')}
+    </div>
+    <div class="add-milestone">
+      <input type="text" placeholder="Add a milestone…" data-mname="${p.id}">
+      <input type="date" data-mdate="${p.id}" value="${dayKey(todayStart())}">
+      <button class="btn small" data-act="add-milestone" data-id="${p.id}">Add</button>
+    </div>
+  </div>`;
+}
+function wireProjectActions(){
+  document.querySelectorAll('[data-act=toggle-milestone]').forEach(b=>b.onclick=()=>{
+    const p = projectById(b.dataset.pid); const m = p.milestones.find(m=>m.id===b.dataset.mid);
+    m.done = !m.done; renderProjects();
+  });
+  document.querySelectorAll('[data-act=del-project]').forEach(b=>b.onclick=()=>{
+    state.projects = state.projects.filter(p=>p.id!==b.dataset.id); renderProjects(); toast('Project deleted.');
+  });
+  document.querySelectorAll('[data-act=add-milestone]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.id;
+    const nameInput = document.querySelector(`[data-mname="${id}"]`);
+    const dateInput = document.querySelector(`[data-mdate="${id}"]`);
+    const name = nameInput.value.trim();
+    if(!name){ toast('Name the milestone first.'); return; }
+    const p = projectById(id);
+    p.milestones.push({id:uid(), name, date:new Date(dateInput.value+'T00:00:00'), done:false});
+    p.milestones.sort((a,b)=>a.date-b.date);
+    renderProjects(); toast('Milestone added.');
+  });
+}
+function openProjectPanel(){
+  const subs = state.user.subjects;
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <button class="panel-close" data-act="close-panel">&times;</button>
+    <h3>New IB project</h3>
+    <div class="field"><label>Project name</label><input id="pp-name" placeholder="e.g. Extended Essay — Economics"></div>
+    <div class="field-row">
+      <div class="field"><label>Type</label><select id="pp-type">${PROJECT_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Subject (optional)</label><select id="pp-subject"><option value="">—</option>${subs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label>Overall deadline</label><input type="date" id="pp-deadline" value="${dayKey(addDays(todayStart(),60))}"></div>
+    <div class="field"><label>Notes</label><textarea id="pp-notes"></textarea></div>
+    <div class="panel-actions"><button class="btn" id="pp-save">Create project</button></div>
+  `;
+  document.getElementById('panel-overlay').classList.add('open');
+  document.querySelector('#panel [data-act=close-panel]').onclick = closePanel;
+  document.getElementById('pp-save').onclick = ()=>{
+    const name = document.getElementById('pp-name').value.trim();
+    if(!name){ toast('Give the project a name.'); return; }
+    state.projects.push({
+      id:uid(), name, type:document.getElementById('pp-type').value,
+      subjectId: document.getElementById('pp-subject').value||null,
+      deadline: new Date(document.getElementById('pp-deadline').value+'T00:00:00'),
+      notes: document.getElementById('pp-notes').value.trim(),
+      milestones: []
+    });
+    closePanel(); renderProjects(); toast('Project created.');
+  };
+}
+ 
+/* ---------------------- shared row actions ---------------------- */
+function wireRowActions(){
+  document.querySelectorAll('[data-act=toggle-complete]').forEach(b=>b.onclick=(e)=>{
+    e.stopPropagation();
+    const a = state.assignments.find(x=>x.id===b.dataset.id);
+    if(a.status==='completed'){ a.status='in-progress'; a.progress=Math.min(a.progress,90)||50; }
+    else { a.status='completed'; a.progress=100; }
+    render();
+  });
+  document.querySelectorAll('[data-act=open-edit]').forEach(b=>b.onclick=()=> openAssignmentPanel(b.dataset.id));
+  document.querySelectorAll('[data-act=delete]').forEach(b=>b.onclick=()=>{
+    state.assignments = state.assignments.filter(a=>a.id!==b.dataset.id); render(); toast('Assignment deleted.');
+  });
+  document.querySelectorAll('[data-act=toggle-subtask]').forEach(b=>b.onclick=()=>{
+    const a = state.assignments.find(x=>x.id===b.dataset.id);
+    const st = a.subtasks.find(s=>s.id===b.dataset.sid);
+    st.done = !st.done; render();
+  });
+}
+ 
+/* ---------------------- shell / nav ---------------------- */
+function render(){
+  document.querySelectorAll('.railnav button').forEach(b=> b.classList.toggle('active', b.dataset.view===state.view));
+  if(state.view==='dashboard') renderDashboard();
+  else if(state.view==='assignments') renderAssignments();
+  else if(state.view==='calendar') renderCalendar();
+  else if(state.view==='projects') renderProjects();
+}
+ 
+function initApp(){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').classList.add('ready');
+  document.getElementById('who-name').textContent = state.user.name;
+  document.getElementById('who-sub').textContent = `${state.user.program} · Grade ${state.user.grade}`;
+  document.getElementById('av').textContent = state.user.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  document.querySelectorAll('#nav button').forEach(b=> b.onclick = ()=>{ state.view=b.dataset.view; render(); });
+  render();
+}
+ 
+/* ---------------------- theme ---------------------- */
+function applyTheme(){
+  const root = document.documentElement;
+  if(state.theme==='dark'){ root.setAttribute('data-theme','dark'); }
+  else if(state.theme==='light'){ root.setAttribute('data-theme','light'); }
+  else { root.removeAttribute('data-theme'); }
+  const mq = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = state.theme==='dark' || (state.theme==='auto' && mq);
+  document.getElementById('theme-label').textContent = isDark? 'Dark mode':'Light mode';
+}
+document.getElementById('theme-toggle').onclick = ()=>{
+  const mq = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const currentlyDark = state.theme==='dark' || (state.theme==='auto' && mq);
+  state.theme = currentlyDark? 'light':'dark';
+  applyTheme();
+};
+applyTheme();
+ 
+/* ---------------------- onboarding wiring ---------------------- */
+document.getElementById('btn-start').onclick = ()=>{
+  document.getElementById('auth-welcome').style.display='none';
+  document.getElementById('onboard').style.display='block';
+};
+document.getElementById('btn-demo').onclick = ()=>{
+  seedDemo();
+  initApp();
+};
+ 
+let obSubjects = [];
+document.getElementById('subj-add-btn').onclick = ()=>{
+  const nameEl = document.getElementById('subj-name');
+  const name = nameEl.value.trim();
+  if(!name) return;
+  const level = document.getElementById('subj-level').value;
+  obSubjects.push({id:uid(), name, level, color:PALETTE[obSubjects.length%PALETTE.length]});
+  nameEl.value='';
+  renderSubjList();
+};
+function renderSubjList(){
+  document.getElementById('subj-list').innerHTML = obSubjects.map(s=>`
+    <div class="subj-chip"><span>${esc(s.name)}</span><span class="mono" style="color:var(--ink-soft);">${s.level}</span><button type="button" class="x" data-id="${s.id}">&times;</button></div>
+  `).join('');
+  document.querySelectorAll('#subj-list .x').forEach(b=>b.onclick=()=>{ obSubjects = obSubjects.filter(s=>s.id!==b.dataset.id); renderSubjList(); });
+}
+document.querySelectorAll('#onboard [data-next]').forEach(b=>b.onclick=()=>{
+  const cur = b.closest('.step').dataset.step;
+  if(cur==='1' && !document.getElementById('ob-name').value.trim()){ toast('Enter your name to continue.'); return; }
+  if(cur==='2' && obSubjects.length===0){ toast('Add at least one subject.'); return; }
+  goStep(b.dataset.next);
+});
+document.querySelectorAll('#onboard [data-prev]').forEach(b=>b.onclick=()=> goStep(b.dataset.prev));
+function goStep(n){
+  document.querySelectorAll('#onboard .step').forEach(s=> s.classList.toggle('active', s.dataset.step===n));
+  document.querySelectorAll('.dots span').forEach((d,i)=> d.classList.toggle('on', i<n));
+}
+document.getElementById('onboard').addEventListener('submit', e=>{
+  e.preventDefault();
+  state.user = {
+    name: document.getElementById('ob-name').value.trim(),
+    grade: document.getElementById('ob-grade').value.trim(),
+    program: document.getElementById('ob-year').value,
+    subjects: obSubjects,
+    notif: { heavy: document.getElementById('ob-n1').checked, overdue: document.getElementById('ob-n2').checked, milestones: document.getElementById('ob-n3').checked }
+  };
+  state.assignments = []; state.projects = []; state.sessions = [];
+  initApp();
+  toast(`Welcome, ${state.user.name.split(' ')[0]} — add your first assignment to get started.`);
+});
+ 
+})();
+</script>
+</body>
+</html>
+ 
